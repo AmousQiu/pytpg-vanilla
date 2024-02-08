@@ -19,9 +19,13 @@ def main():
     iris = datasets.load_iris()
     X = iris.data
     y = iris.target
-
+    
     for i in range(100):
-        best_score=model.generation(X,y,i)
+        champion_team=model.generation(X,y,i)
+        if i%10 == 0:
+            filepath = "champion_"+str(i)
+            model.saveChampion(champion_team,filepath)          
+            champion_team = model.loadChampion(filepath)
 
 if __name__ == "__main__":
     main()

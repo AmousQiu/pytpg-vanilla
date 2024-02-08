@@ -8,6 +8,7 @@ import random
 from typing import List, Tuple, Dict
 import numpy as np
 from sklearn.metrics import f1_score
+import pickle
 
 class Model:
 
@@ -46,62 +47,31 @@ class Model:
             y_pred = self.predict(X,team)
             score = f1_score(y, y_pred, average='macro')
             team.scores.append(score)
-        print(f"Generation #{gen} Team #{teamNum + 1} ({team.id})")
-        print(f"Team finished with score: {score}, score*: {team.getFitness()}")
 
         
-        print("\nGeneration complete.\n")
+        print("\nGeneration", gen, "complete.\n")
         print("Best performing teams:")
         sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
         
         for team in sortedTeams[-5:]:
             team.luckyBreaks += 1
-        for team in sortedTeams[-5:]:
-            print(f"Team {team.id} score: {team.getFitness()}, lucky breaks: {team.luckyBreaks}")
-        print()
-        
-        self.select(gen)
+
+        championTeam = sortedTeams[-1]
+        print(f"Team {championTeam.id} score: {championTeam.getFitness()}, lucky breaks: {championTeam.luckyBreaks}")
+        self.select(sortedTeams)
         self.evolve()
+        return championTeam
     
-    def fit(self, environment: Environment, numGenerations: int, maxStepsPerGeneration: int) -> None:
-        for generation in range(1, numGenerations+1):
-            for teamNum, team in enumerate(self.getRootTeams()):
-                state = environment.reset()
-                score = 0
-                step = 0
-                while True:
-                    action = team.getAction(self.teamPopulation, state)
-                    
-                    state, reward, finished = environment.step(action)
-
-                    score += reward
-                    step += 1
-                    if finished or step == maxStepsPerGeneration:
-                        break
-                team.scores.append(score)
-                # assign score to team
-
-                #print(f"Generation #{generation} Team #{teamNum + 1} ({team.id})")
-                #print(f"Team finished with score: {score}, score*: {team.getFitness()}")
-
-                    
-            print("\nGeneration complete.\n")
-
-            print("Best performing teams:")
-            sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
-
-            for team in sortedTeams[-5:]:
-                team.luckyBreaks += 1
-            for team in sortedTeams[-5:]:
-                print(f"Team {team.id} score: {team.getFitness()}, lucky breaks: {team.luckyBreaks}")
-            print()
-            
-            self.select(generation)
-
-            self.evolve()
-            
-            
-
+    def saveChampion(self,championTeam,filepath):
+        with open(filepath,'wb') as f:
+            pickle.dump(championTeam,f)
+        print(f"Champion team saved to {filepath}")
+    
+    def loadChampion(self,filepath):
+        with open(filepath, 'rb') as f:
+            championTeam = pickle.load(f)
+        return championTeam
+    
     def cleanProgramPopulation(self) -> None:
         inUseProgramIds: List[str] = []
         for team in self.teamPopulation:
@@ -113,9 +83,9 @@ class Model:
                 self.programPopulation.remove(program)
 
     # Remove uncompetitive teams from the population
-    def select(self, generation: int = -1) -> None:
+    def select(self, sortedTeams) -> None:
 
-        sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
+        #sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
 
         # Remove a POPGAP fraction of teams
         remainingTeamsCount: int = int(Parameters.POPGAP * len(self.getRootTeams()))
