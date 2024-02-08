@@ -1,8 +1,8 @@
 from typing import List
 
 class Parameters:
-    POPULATION_SIZE: int = 36
-    INITIAL_PROGRAM_POPULATION: int = 100
+    POPULATION_SIZE: int = 360
+    INITIAL_PROGRAM_POPULATION: int = 1000
     POPGAP: float = 0.8
     ACTIONS: List[str] = [ "DO_NOTHING", "STEER_LEFT", "STEER_RIGHT", "GAS", "BRAKE" ]
     ENVIRONMENT: str = "CarRacing-v2"

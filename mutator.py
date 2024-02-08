@@ -120,3 +120,30 @@ class Mutator:
                             t.referenceCount -= 1
                 
                 program.action = random.choice(Parameters.ACTIONS)
+
+    @staticmethod
+    def team_crossover(programPopulation:List[Program],teamPopulation: List[Team]) -> None:
+        # Ensure there are at least 2 teams to perform crossover
+        if len(teamPopulation) < 2:
+            return
+
+        # Select two parent teams randomly
+        parent1, parent2 = random.sample(teamPopulation, 2)
+
+        # Determine crossover points for each parent
+        crossover_point_parent1 = random.randint(1, len(parent1.programs) - 1)
+        crossover_point_parent2 = random.randint(1, len(parent2.programs) - 1)
+
+        # Create offspring by exchanging programs at the crossover points
+        offspring1_programs = parent1.programs[:crossover_point_parent1] + parent2.programs[crossover_point_parent2:]
+        offspring2_programs = parent2.programs[:crossover_point_parent2] + parent1.programs[crossover_point_parent1:]
+
+        offspring1 = Team(programPopulation,offspring1_programs)  
+        offspring2 = Team(programPopulation,offspring2_programs)  
+        offspring1.referenceCount = 0
+        offspring2.referenceCount = 0
+
+        return offspring1,offspring2
+
+
+        
