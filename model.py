@@ -7,6 +7,7 @@ from parameters import Parameters
 import random
 from typing import List, Tuple, Dict
 import numpy as np
+from sklearn.metrics import f1_score
 
 class Model:
 
@@ -31,15 +32,43 @@ class Model:
 
         return rootTeams
 
-    def fit(self, environment: Environment, numGenerations: int, maxStepsPerGeneration: int) -> None:
+    
+    def predict(self,X,team):
+        y_pred = []
+        for i in range(len(X)):
+            action = team.getAction(self.teamPopulation,X[i])
+            y_pred.append(action)
+        return y_pred 
+    
+    def generation(self, X,y,gen) -> None:
+        for teamNum, team in enumerate(self.getRootTeams()):
+            score = 0
+            y_pred = self.predict(X,team)
+            score = f1_score(y, y_pred, average='macro')
+            team.scores.append(score)
+        print(f"Generation #{gen} Team #{teamNum + 1} ({team.id})")
+        print(f"Team finished with score: {score}, score*: {team.getFitness()}")
 
+        
+        print("\nGeneration complete.\n")
+        print("Best performing teams:")
+        sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
+        
+        for team in sortedTeams[-5:]:
+            team.luckyBreaks += 1
+        for team in sortedTeams[-5:]:
+            print(f"Team {team.id} score: {team.getFitness()}, lucky breaks: {team.luckyBreaks}")
+        print()
+        
+        self.select(gen)
+        self.evolve()
+    
+    def fit(self, environment: Environment, numGenerations: int, maxStepsPerGeneration: int) -> None:
         for generation in range(1, numGenerations+1):
             for teamNum, team in enumerate(self.getRootTeams()):
-
                 state = environment.reset()
                 score = 0
                 step = 0
-
                 while True:
                     action = team.getAction(self.teamPopulation, state)
                     
@@ -47,15 +76,13 @@ class Model:
 
                     score += reward
                     step += 1
-
                     if finished or step == maxStepsPerGeneration:
                         break
-
                 team.scores.append(score)
                 # assign score to team
 
-                print(f"Generation #{generation} Team #{teamNum + 1} ({team.id})")
-                print(f"Team finished with score: {score}, score*: {team.getFitness()}")
+                #print(f"Generation #{generation} Team #{teamNum + 1} ({team.id})")
+                #print(f"Team finished with score: {score}, score*: {team.getFitness()}")
 
                     
             print("\nGeneration complete.\n")
@@ -72,6 +99,8 @@ class Model:
             self.select(generation)
 
             self.evolve()
+            
+            
 
     def cleanProgramPopulation(self) -> None:
         inUseProgramIds: List[str] = []
@@ -95,9 +124,9 @@ class Model:
             
             if team.luckyBreaks > 0:
                 team.luckyBreaks -= 1
-                print(f"Tried to remove team {team.id} but they had a lucky break! {team.getFitness()} (remaining breaks: {team.luckyBreaks})")
+                #print(f"Tried to remove team {team.id} but they had a lucky break! {team.getFitness()} (remaining breaks: {team.luckyBreaks})")
             else:
-                print(f"Removing team {team.id} with fitness {team.getFitness()}")
+                #print(f"Removing team {team.id} with fitness {team.getFitness()}")
                 self.teamPopulation.remove(team)
 
         # Clean up, if there are programs that are not referenced by any teams.
