@@ -64,6 +64,9 @@ class Mutator:
         if random.random() < Parameters.MUTATE_INSTRUCTION_PROBABILITY:
             Mutator.mutateInstruction(random.choice(program.instructions))
 
+        # check if new instruction sets is larger than max instruction counts
+        if len(program.instructions) > Parameters.MAX_INSTRUCTION_COUNT:
+            program.instructions = program.instructions[:Parameters.MAX_INSTRUCTION_COUNT]
         newHash: int = hash(program)
 
         # Mutation is the same as the original, try again.
@@ -140,6 +143,13 @@ class Mutator:
 
         offspring1 = Team(programPopulation,offspring1_programs)  
         offspring2 = Team(programPopulation,offspring2_programs)  
+        
+        # check if new instruction sets is larger than max instruction counts
+        if len(offspring1.instructions) > Parameters.MAX_INSTRUCTION_COUNT:
+            offspring1.instructions = offspring1.instructions[:Parameters.MAX_INSTRUCTION_COUNT]
+        if len(offspring2.instructions) > Parameters.MAX_INSTRUCTION_COUNT:
+            offspring2.instructions = offspring2.instructions[:Parameters.MAX_INSTRUCTION_COUNT]
+                        
         offspring1.referenceCount = 0
         offspring2.referenceCount = 0
 
