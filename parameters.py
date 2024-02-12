@@ -15,9 +15,11 @@ class Parameters:
     ADD_PROGRAM_PROBABILITY: float = 0.7
     DELETE_PROGRAM_PROBABILITY: float = 0.7
     NEW_PROGRAM_PROBABILITY: float = 0.1
+    CROSSOVER_PROBABILITY:float = 0.2
     MUTATE_PROGRAM_PROBABILITY: float = 0.2
     TEAM_POINTER_PROBABILITY: float = 0.5
     MAX_INSTRUCTION_COUNT: float = 97
     MAX_INITIAL_TEAM_SIZE: float = 5
+    
     
     

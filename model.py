@@ -106,7 +106,7 @@ class Model:
     # Create new teams cloned from the remaining root teams
     def evolve(self) -> None:
         left_team_len = Parameters.POPULATION_SIZE-len(self.getRootTeams())
-        for i in range(int(left_team_len*0.2)):
+        for i in range(int(left_team_len*Parameters.CROSSOVER_PROBABILITY)):
             offspring1,offspring2 = Mutator.team_crossover(self.programPopulation,self.teamPopulation)
             self.teamPopulation.append(offspring1)
             self.teamPopulation.append(offspring2)
