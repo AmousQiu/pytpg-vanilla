@@ -4,7 +4,7 @@ from typing import List
 from skmultiflow.data import DataStream
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score,f1_score
 import warnings
 from debugger import Debugger
 from parameters import Parameters
@@ -23,9 +23,25 @@ def main():
     for i in range(100):
         champion_team=model.generation(X,y,i)
         if i%10 == 0:
-            filepath = "champion_"+str(i)
-            model.saveChampion(champion_team,filepath)          
-            champion_team = model.loadChampion(filepath)
+            teampath = "champion_team_"+str(i)
+            modelpath = "champion_model_"+str(i)
+            model.saveChampionTeam(champion_team,teampath)       
+            model.saveChampionModel(modelpath)   
 
+def champion_run():
+    iris = datasets.load_iris()
+    Parameters.ACTIONS = [0,1,2]
+    Parameters.NUM_OBSERVATIONS = 4
+    X = iris.data
+    y = iris.target
+    model = Model()
+    champion_model = model.loadChampionModel('/home/amous/Research/pytpg-vanilla/champion_model_0')
+    champion_team = champion_model.loadChampionTeam('/home/amous/Research/pytpg-vanilla/champion_team_0')
+
+    y_pred = champion_model.predict(X,champion_team)
+    score = f1_score(y, y_pred, average='macro')
+    print("accuracy is:",score)
+    
 if __name__ == "__main__":
-    main()
+    #main()
+    champion_run()

@@ -132,24 +132,29 @@ class Mutator:
 
         # Select two parent teams randomly
         parent1, parent2 = random.sample(teamPopulation, 2)
+        
+        while len(parent1.programs) <= 1 or len(parent2.programs) <= 1:
+            parent1, parent2 = random.sample(teamPopulation, 2)
 
         # Determine crossover points for each parent
         crossover_point_parent1 = random.randint(1, len(parent1.programs) - 1)
         crossover_point_parent2 = random.randint(1, len(parent2.programs) - 1)
 
-        # Create offspring by exchanging programs at the crossover points
-        offspring1_programs = parent1.programs[:crossover_point_parent1] + parent2.programs[crossover_point_parent2:]
-        offspring2_programs = parent2.programs[:crossover_point_parent2] + parent1.programs[crossover_point_parent1:]
+        # Create offspring by exchanging programs at the crossover points, ensuring no duplicates
+        offspring1_programs = parent1.programs[:crossover_point_parent1]
+        offspring2_programs = parent2.programs[:crossover_point_parent2]
+
+        # Add unique programs from the other parent, avoiding duplicates
+        for program in parent2.programs[crossover_point_parent2:]:
+            if program not in offspring1_programs:
+                offspring1_programs.append(program)
+        for program in parent1.programs[crossover_point_parent1:]:
+            if program not in offspring2_programs:
+                offspring2_programs.append(program)
 
         offspring1 = Team(programPopulation,offspring1_programs)  
         offspring2 = Team(programPopulation,offspring2_programs)  
-        
-        # check if new instruction sets is larger than max instruction counts
-        if len(offspring1.instructions) > Parameters.MAX_INSTRUCTION_COUNT:
-            offspring1.instructions = offspring1.instructions[:Parameters.MAX_INSTRUCTION_COUNT]
-        if len(offspring2.instructions) > Parameters.MAX_INSTRUCTION_COUNT:
-            offspring2.instructions = offspring2.instructions[:Parameters.MAX_INSTRUCTION_COUNT]
-                        
+
         offspring1.referenceCount = 0
         offspring2.referenceCount = 0
 

@@ -61,6 +61,7 @@ class Team:
     def getFitness(self):
             return self.scores[-1]
 
+    
     # Given a parent team, a new offspring team is cloned and mutated
     def copy(self):
         clone: 'Team' = deepcopy(self)

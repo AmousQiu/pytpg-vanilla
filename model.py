@@ -62,12 +62,22 @@ class Model:
         self.evolve()
         return championTeam
     
-    def saveChampion(self,championTeam,filepath):
+    def saveChampionModel(self,filepath):
+        with open(filepath,'wb') as f:
+            pickle.dump(self,f)
+        print(f"Champion model saved to {filepath}")
+        
+    def loadChampionModel(self,filepath):
+        with open(filepath, 'rb') as f:
+            championModel = pickle.load(f)
+        return championModel
+        
+    def saveChampionTeam(self,championTeam,filepath):
         with open(filepath,'wb') as f:
             pickle.dump(championTeam,f)
         print(f"Champion team saved to {filepath}")
     
-    def loadChampion(self,filepath):
+    def loadChampionTeam(self,filepath):
         with open(filepath, 'rb') as f:
             championTeam = pickle.load(f)
         return championTeam
