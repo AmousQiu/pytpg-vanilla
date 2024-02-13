@@ -14,6 +14,9 @@ warnings.filterwarnings("ignore", message="overflow encountered in double_scalar
 def main():
     Parameters.ACTIONS = [0,1,2]
     Parameters.NUM_OBSERVATIONS = 4
+    Parameters.POPULATION_SIZE = 30
+    Parameters.INITIAL_PROGRAM_POPULATION =100
+    Parameters.LUCKY_BREAK_NUM = 1
     model = Model()
     debugger = Debugger()
     iris = datasets.load_iris()
@@ -35,8 +38,8 @@ def champion_run():
     X = iris.data
     y = iris.target
     model = Model()
-    champion_model = model.loadChampionModel('/home/amous/Research/pytpg-vanilla/champion_model_0')
-    champion_team = champion_model.loadChampionTeam('/home/amous/Research/pytpg-vanilla/champion_team_0')
+    champion_model = model.loadChampionModel('/home/amous/Research/pytpg-vanilla/champion_model_90')
+    champion_team = champion_model.loadChampionTeam('/home/amous/Research/pytpg-vanilla/champion_team_90')
 
     y_pred = champion_model.predict(X,champion_team)
     score = f1_score(y, y_pred, average='macro')
@@ -44,4 +47,4 @@ def champion_run():
     
 if __name__ == "__main__":
     #main()
-    champion_run()
+   champion_run()

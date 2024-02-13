@@ -53,7 +53,7 @@ class Model:
         print("Best performing teams:")
         sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
         
-        for team in sortedTeams[-5:]:
+        for team in sortedTeams[-Parameters.LUCKY_BREAK_NUM:]:
             team.luckyBreaks += 1
 
         championTeam = sortedTeams[-1]

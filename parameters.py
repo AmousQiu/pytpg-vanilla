@@ -2,6 +2,7 @@ from typing import List
 
 class Parameters:
     POPULATION_SIZE: int = 360
+    LUCKY_BREAK_NUM = 5
     INITIAL_PROGRAM_POPULATION: int = 1000
     POPGAP: float = 0.8
     ACTIONS: List[str] = [ "DO_NOTHING", "STEER_LEFT", "STEER_RIGHT", "GAS", "BRAKE" ]
@@ -20,6 +21,4 @@ class Parameters:
     TEAM_POINTER_PROBABILITY: float = 0.5
     MAX_INSTRUCTION_COUNT: float = 97
     MAX_INITIAL_TEAM_SIZE: float = 5
-    
-    
     

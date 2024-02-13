@@ -76,17 +76,22 @@ class Mutator:
     # TODO: Add a hash for teams so we know each team is unique after mutation
     @staticmethod
     def mutateTeam(programPopulation: List[Program], teamPopulation: List[Team], team: Team):
+        
+        numAtomicActions: int = 0
+        for program in team.programs:
+            if program.action in Parameters.ACTIONS:
+                numAtomicActions += 1
         # add a program
         if random.random() < Parameters.ADD_PROGRAM_PROBABILITY:
             
             newProgram: Program = random.choice(programPopulation) 
 
             ids = [ program.id for program in team.programs ]
-            # Ensure we're not adding a duplicate program to the team
-            while newProgram.id in ids:
-                newProgram = random.choice(programPopulation)
-            
-            team.programs.append(newProgram)
+            # Ensure we're not adding a duplicate program to the team. If already added all the programs, then skip
+            if len(programPopulation)>len(ids):
+                while newProgram.id in ids:
+                    newProgram = random.choice(programPopulation)
+                team.programs.append(newProgram)
 
         # delete a program
         if random.random() < Parameters.DELETE_PROGRAM_PROBABILITY:
@@ -101,11 +106,6 @@ class Mutator:
 
         # mutate a program's action
         if random.random() < Parameters.MUTATE_PROGRAM_PROBABILITY:
-            numAtomicActions: int = 0
-            for program in team.programs:
-                if program.action in Parameters.ACTIONS:
-                    numAtomicActions += 1
-            
             program: Program = random.choice(team.programs)
             
             # A team must have at least one atomic action!

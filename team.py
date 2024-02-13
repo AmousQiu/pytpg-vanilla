@@ -42,6 +42,13 @@ class Team:
         
     # Choose the program with the highest confidence
     def getAction(self, teamPopulation: List['Team'], state: np.array, visited: List[str] = []) -> str:
+        if visited is None:
+            visited = []  # Initialize visited as an empty list if not provided
+        
+        if self in visited:
+            # Detected a cycle, handle it appropriately, e.g., raise an error, return a default action, etc.
+            raise RuntimeError(f"Cycle detected: Team {self.id} is referencing itself directly or indirectly.")
+
         visited.append(self)
 
         sortedPrograms = sorted(self.programs, key=lambda program: program.bid(state)['confidence'])
@@ -53,10 +60,9 @@ class Team:
                 return program.action
             else:
                 for team in teamPopulation:
-                    if str(team.id) == program.action:
+                    if str(team.id) == program.action and team not in visited:
                         return team.getAction(teamPopulation, state, visited)
-                return random.choice(Parameters.ACTIONS)
-                raise RuntimeError(f"Team {self.id} points to team {program.action}, and that team does not exist within the population.")
+        raise RuntimeError(f"Team {self.id} points to team {program.action}, and that team does not exist within the population.")
 
     def getFitness(self):
             return self.scores[-1]
