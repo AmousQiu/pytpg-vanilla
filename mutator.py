@@ -64,6 +64,9 @@ class Mutator:
         if random.random() < Parameters.MUTATE_INSTRUCTION_PROBABILITY:
             Mutator.mutateInstruction(random.choice(program.instructions))
 
+        # check if new instruction sets is larger than max instruction counts
+        if len(program.instructions) > Parameters.MAX_INSTRUCTION_COUNT:
+            program.instructions = program.instructions[:Parameters.MAX_INSTRUCTION_COUNT]
         newHash: int = hash(program)
 
         # Mutation is the same as the original, try again.
@@ -73,17 +76,22 @@ class Mutator:
     # TODO: Add a hash for teams so we know each team is unique after mutation
     @staticmethod
     def mutateTeam(programPopulation: List[Program], teamPopulation: List[Team], team: Team):
+        
+        numAtomicActions: int = 0
+        for program in team.programs:
+            if program.action in Parameters.ACTIONS:
+                numAtomicActions += 1
         # add a program
         if random.random() < Parameters.ADD_PROGRAM_PROBABILITY:
             
             newProgram: Program = random.choice(programPopulation) 
 
             ids = [ program.id for program in team.programs ]
-            # Ensure we're not adding a duplicate program to the team
-            while newProgram.id in ids:
-                newProgram = random.choice(programPopulation)
-            
-            team.programs.append(newProgram)
+            # Ensure we're not adding a duplicate program to the team. If already added all the programs, then skip
+            if len(programPopulation)>len(ids):
+                while newProgram.id in ids:
+                    newProgram = random.choice(programPopulation)
+                team.programs.append(newProgram)
 
         # delete a program
         if random.random() < Parameters.DELETE_PROGRAM_PROBABILITY:
@@ -98,11 +106,6 @@ class Mutator:
 
         # mutate a program's action
         if random.random() < Parameters.MUTATE_PROGRAM_PROBABILITY:
-            numAtomicActions: int = 0
-            for program in team.programs:
-                if program.action in Parameters.ACTIONS:
-                    numAtomicActions += 1
-            
             program: Program = random.choice(team.programs)
             
             # A team must have at least one atomic action!
@@ -120,3 +123,42 @@ class Mutator:
                             t.referenceCount -= 1
                 
                 program.action = random.choice(Parameters.ACTIONS)
+
+    @staticmethod
+    def team_crossover(programPopulation:List[Program],teamPopulation: List[Team]) -> None:
+        # Ensure there are at least 2 teams to perform crossover
+        if len(teamPopulation) < 2:
+            return
+
+        # Select two parent teams randomly
+        parent1, parent2 = random.sample(teamPopulation, 2)
+        
+        while len(parent1.programs) <= 1 or len(parent2.programs) <= 1:
+            parent1, parent2 = random.sample(teamPopulation, 2)
+
+        # Determine crossover points for each parent
+        crossover_point_parent1 = random.randint(1, len(parent1.programs) - 1)
+        crossover_point_parent2 = random.randint(1, len(parent2.programs) - 1)
+
+        # Create offspring by exchanging programs at the crossover points, ensuring no duplicates
+        offspring1_programs = parent1.programs[:crossover_point_parent1]
+        offspring2_programs = parent2.programs[:crossover_point_parent2]
+
+        # Add unique programs from the other parent, avoiding duplicates
+        for program in parent2.programs[crossover_point_parent2:]:
+            if program not in offspring1_programs:
+                offspring1_programs.append(program)
+        for program in parent1.programs[crossover_point_parent1:]:
+            if program not in offspring2_programs:
+                offspring2_programs.append(program)
+
+        offspring1 = Team(programPopulation,offspring1_programs)  
+        offspring2 = Team(programPopulation,offspring2_programs)  
+
+        offspring1.referenceCount = 0
+        offspring2.referenceCount = 0
+
+        return offspring1,offspring2
+
+
+        

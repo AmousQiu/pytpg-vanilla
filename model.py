@@ -6,6 +6,9 @@ from parameters import Parameters
 
 import random
 from typing import List, Tuple, Dict
+import numpy as np
+from sklearn.metrics import f1_score
+import pickle
 
 class Model:
 
@@ -22,10 +25,6 @@ class Model:
         for team in self.teamPopulation:
             team.referenceCount = 0
 
-        self.data: Dict[str, float] = {}
-        for team in self.teamPopulation:
-            self.data[team.id] = 0.0 
-
     def getRootTeams(self) -> List[Team]:
         rootTeams: List[Team] = []
         for team in self.teamPopulation:
@@ -34,40 +33,55 @@ class Model:
 
         return rootTeams
 
-    def fit(self, environment: Environment, numGenerations: int, maxStepsPerGeneration: int) -> None:
+    
+    def predict(self,X,team):
+        y_pred = []
+        for i in range(len(X)):
+            action = team.getAction(self.teamPopulation,X[i])
+            y_pred.append(action)
+        return y_pred 
+    
+    def generation(self, X,y,gen) -> None:
+        for teamNum, team in enumerate(self.getRootTeams()):
+            score = 0
+            y_pred = self.predict(X,team)
+            score = f1_score(y, y_pred, average='macro')
+            team.scores.append(score)
 
-        for generation in range(1, numGenerations+1):
-            for teamNum, team in enumerate(self.getRootTeams()):
+        
+        print("\nGeneration", gen, "complete.\n")
+        print("Best performing teams:")
+        sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
+        
+        for team in sortedTeams[-Parameters.LUCKY_BREAK_NUM:]:
+            team.luckyBreaks += 1
 
-                state = environment.reset()
-                score = 0
-                step = 0
-                print(f"Generation #{generation} Team #{teamNum + 1} ({team.id})")
-
-                while True:
-
-
-                    action = team.getAction(self.teamPopulation, state)
-                    
-                    state, reward, finished = environment.step(action)
-
-                    score += reward
-                    step += 1
-
-                    if finished or step == maxStepsPerGeneration:
-                        break
-
-                self.data[team.id] = score
-                # assign score to team
-                print(f"Team finished with score: {score}")
-
-            print("\nGeneration complete.\n")
-            
-            self.select(self.data, generation)
-            self.data = {}
-
-            self.evolve()
-
+        championTeam = sortedTeams[-1]
+        print(f"Team {championTeam.id} score: {championTeam.getFitness()}, lucky breaks: {championTeam.luckyBreaks}")
+        self.select(sortedTeams)
+        self.evolve()
+        return championTeam
+    
+    def saveChampionModel(self,filepath):
+        with open(filepath,'wb') as f:
+            pickle.dump(self,f)
+        print(f"Champion model saved to {filepath}")
+        
+    def loadChampionModel(self,filepath):
+        with open(filepath, 'rb') as f:
+            championModel = pickle.load(f)
+        return championModel
+        
+    def saveChampionTeam(self,championTeam,filepath):
+        with open(filepath,'wb') as f:
+            pickle.dump(championTeam,f)
+        print(f"Champion team saved to {filepath}")
+    
+    def loadChampionTeam(self,filepath):
+        with open(filepath, 'rb') as f:
+            championTeam = pickle.load(f)
+        return championTeam
+    
     def cleanProgramPopulation(self) -> None:
         inUseProgramIds: List[str] = []
         for team in self.teamPopulation:
@@ -79,16 +93,20 @@ class Model:
                 self.programPopulation.remove(program)
 
     # Remove uncompetitive teams from the population
-    def select(self, data: Dict[str, float], generation: int = -1) -> None:
-        ids: List[str] = list(sorted(data, key=data.get, reverse=True))
+    def select(self, sortedTeams) -> None:
+
+        #sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
 
         # Remove a POPGAP fraction of teams
-        remainingTeamsCount: int = int(Parameters.POPGAP * len(ids))
-        ids = ids[:remainingTeamsCount]
+        remainingTeamsCount: int = int(Parameters.POPGAP * len(self.getRootTeams()))
 
-        for team in self.teamPopulation:
-            if team.id not in ids and team.referenceCount == 0:
-                print(f"REMOVED team {team.id} after generation {generation}. It had {team.referenceCount} references")
+        for team in sortedTeams[:remainingTeamsCount]:
+            
+            if team.luckyBreaks > 0:
+                team.luckyBreaks -= 1
+                #print(f"Tried to remove team {team.id} but they had a lucky break! {team.getFitness()} (remaining breaks: {team.luckyBreaks})")
+            else:
+                #print(f"Removing team {team.id} with fitness {team.getFitness()}")
                 self.teamPopulation.remove(team)
 
         # Clean up, if there are programs that are not referenced by any teams.
@@ -97,6 +115,12 @@ class Model:
 
     # Create new teams cloned from the remaining root teams
     def evolve(self) -> None:
+        left_team_len = Parameters.POPULATION_SIZE-len(self.getRootTeams())
+        for i in range(int(left_team_len*Parameters.CROSSOVER_PROBABILITY)):
+            offspring1,offspring2 = Mutator.team_crossover(self.programPopulation,self.teamPopulation)
+            self.teamPopulation.append(offspring1)
+            self.teamPopulation.append(offspring2)
+
         while len(self.getRootTeams()) < Parameters.POPULATION_SIZE:
             team = random.choice(self.getRootTeams()).copy()
             Mutator.mutateTeam(self.programPopulation, self.teamPopulation, team)
