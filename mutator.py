@@ -77,10 +77,7 @@ class Mutator:
     @staticmethod
     def mutateTeam(programPopulation: List[Program], teamPopulation: List[Team], team: Team):
         
-        numAtomicActions: int = 0
-        for program in team.programs:
-            if program.action in Parameters.ACTIONS:
-                numAtomicActions += 1
+
         # add a program
         if random.random() < Parameters.ADD_PROGRAM_PROBABILITY:
             
@@ -95,7 +92,9 @@ class Mutator:
 
         # delete a program
         if random.random() < Parameters.DELETE_PROGRAM_PROBABILITY:
-            if len(team.programs) > 1:
+            numAtomicActions = team.getAtomicActionNum()
+                    
+            if len(team.programs) > 1 and numAtomicActions>1:
                 team.programs.remove(random.choice(team.programs))
         
         # create a new program
@@ -106,14 +105,15 @@ class Mutator:
 
         # mutate a program's action
         if random.random() < Parameters.MUTATE_PROGRAM_PROBABILITY:
+            numAtomicActions = team.getAtomicActionNum()
+                    
             program: Program = random.choice(team.programs)
-            
+
             # A team must have at least one atomic action!
             if numAtomicActions > 1 and random.random() < Parameters.TEAM_POINTER_PROBABILITY:
                 newTeam: Team = random.choice(teamPopulation)
                 while newTeam.id == team.id:
                     newTeam = random.choice(teamPopulation)
-
                 newTeam.referenceCount += 1    
                 program.action = str(newTeam.id) 
             else:
@@ -124,6 +124,7 @@ class Mutator:
                 
                 program.action = random.choice(Parameters.ACTIONS)
 
+'''
     @staticmethod
     def team_crossover(programPopulation:List[Program],teamPopulation: List[Team]) -> None:
         # Ensure there are at least 2 teams to perform crossover
@@ -152,13 +153,16 @@ class Mutator:
             if program not in offspring2_programs:
                 offspring2_programs.append(program)
 
+
         offspring1 = Team(programPopulation,offspring1_programs)  
         offspring2 = Team(programPopulation,offspring2_programs)  
-
+       # if offspring1.getAtomicActionNum()<1:
+            
         offspring1.referenceCount = 0
         offspring2.referenceCount = 0
 
         return offspring1,offspring2
 
+'''
 
         

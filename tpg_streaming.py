@@ -303,7 +303,7 @@ def run_model_with_tpg(X_train, y_train, label_budget, sample_method,max_samples
     Parameters.NUM_OBSERVATIONS = 9
     Parameters.POPULATION_SIZE = 30
     Parameters.INITIAL_PROGRAM_POPULATION =100
-    Parameters.LUCKY_BREAK_NUM = 1
+    Parameters.LUCKY_BREAK_NUM = 2
     model = Model()
 
     debugger = Debugger()

@@ -14,9 +14,9 @@ warnings.filterwarnings("ignore", message="overflow encountered in double_scalar
 def main():
     Parameters.ACTIONS = [0,1,2]
     Parameters.NUM_OBSERVATIONS = 4
-    Parameters.POPULATION_SIZE = 30
-    Parameters.INITIAL_PROGRAM_POPULATION =100
-    Parameters.LUCKY_BREAK_NUM = 1
+    #Parameters.POPULATION_SIZE = 30
+    #Parameters.INITIAL_PROGRAM_POPULATION =100
+    #Parameters.LUCKY_BREAK_NUM = 1
     model = Model()
     debugger = Debugger()
     iris = datasets.load_iris()
@@ -25,11 +25,7 @@ def main():
     
     for i in range(100):
         champion_team=model.generation(X,y,i)
-        if i%10 == 0:
-            teampath = "champion_team_"+str(i)
-            modelpath = "champion_model_"+str(i)
-            model.saveChampionTeam(champion_team,teampath)       
-            model.saveChampionModel(modelpath)   
+        #print(debugger.getInformation(model))
 
 def champion_run():
     iris = datasets.load_iris()
@@ -46,5 +42,5 @@ def champion_run():
     print("accuracy is:",score)
     
 if __name__ == "__main__":
-    #main()
-   champion_run()
+    main()
+   #champion_run()
