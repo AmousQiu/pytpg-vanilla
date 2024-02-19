@@ -23,7 +23,7 @@ class Mutator:
                 instruction.source = instruction.source % Parameters.NUM_REGISTERS
                 
         elif mutatedPart == "OPERATION":
-            instruction.operation = random.choice(['+', '-', '*', '/'])
+            instruction.operation = random.choice(['+', '-', '*', '/', 'COS', 'NEGATE'])
 
         elif mutatedPart == "SOURCE REGISTER":
             if instruction.mode == "INPUT":
@@ -103,27 +103,29 @@ class Mutator:
             programPopulation.append(program)
             team.programs.append(program)
 
-        # mutate a program's action
+        #mutate a program
         if random.random() < Parameters.MUTATE_PROGRAM_PROBABILITY:
+            selectedProgram = random.choice(team.programs) 
+            newProgram = selectedProgram.clone()
+            Mutator.mutateProgram(newProgram)
+            
             numAtomicActions = team.getAtomicActionNum()
-                    
-            program: Program = random.choice(team.programs)
-
             # A team must have at least one atomic action!
             if numAtomicActions > 1 and random.random() < Parameters.TEAM_POINTER_PROBABILITY:
                 newTeam: Team = random.choice(teamPopulation)
                 while newTeam.id == team.id:
                     newTeam = random.choice(teamPopulation)
                 newTeam.referenceCount += 1    
-                program.action = str(newTeam.id) 
+                newProgram.action = str(newTeam.id) 
             else:
-                if program.action not in Parameters.ACTIONS:
+                if newProgram.action not in Parameters.ACTIONS:
                     for t in teamPopulation:
-                        if str(t.id) == program.action:
+                        if str(t.id) == newProgram.action:
                             t.referenceCount -= 1
                 
-                program.action = random.choice(Parameters.ACTIONS)
-
+                newProgram.action = random.choice(Parameters.ACTIONS)
+            team.programs.append(newProgram)
+            programPopulation.append(newProgram)
 '''
     @staticmethod
     def team_crossover(programPopulation:List[Program],teamPopulation: List[Team]) -> None:

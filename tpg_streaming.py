@@ -301,9 +301,9 @@ def champion_run(model,champion,X_train,y_train,sample_method,label_budget,max_s
 def run_model_with_tpg(X_train, y_train, label_budget, sample_method,max_samples,counts):    
     Parameters.ACTIONS = [0,1]
     Parameters.NUM_OBSERVATIONS = 9
-    Parameters.POPULATION_SIZE = 30
-    Parameters.INITIAL_PROGRAM_POPULATION =100
-    Parameters.LUCKY_BREAK_NUM = 2
+    Parameters.POPULATION_SIZE = 13
+    Parameters.INITIAL_PROGRAM_POPULATION =50
+    #Parameters.LUCKY_BREAK_NUM = 2
     model = Model()
 
     debugger = Debugger()

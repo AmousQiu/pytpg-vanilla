@@ -1,3 +1,4 @@
+
 from environment import Environment
 from program import Program
 from team import Team
@@ -7,7 +8,7 @@ from parameters import Parameters
 import random
 from typing import List, Tuple, Dict
 import numpy as np
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score,accuracy_score
 import pickle
 
 class Model:
@@ -45,20 +46,22 @@ class Model:
         return y_pred 
     
     def generation(self, X,y,gen) -> None:
+        print("Teams here:",len(self.getRootTeams()))
         for teamNum, team in enumerate(self.getRootTeams()):
             score = 0
             y_pred = self.predict(X,team)
-            score = f1_score(y, y_pred, average='macro')
+            #score = f1_score(y, y_pred, average='macro')
+            score = accuracy_score(y,y_pred)
             team.scores.append(score)
 
         
         print("\nGeneration", gen, "complete.\n")
-        print("Best performing teams:")
-        sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
         
+        sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
         for team in sortedTeams[-Parameters.LUCKY_BREAK_NUM:]:
             team.luckyBreaks += 1
-
+            
+        print("Best performing teams:")
         championTeam = sortedTeams[-1]
         print(f"Team {championTeam.id} score: {championTeam.getFitness()}, lucky breaks: {championTeam.luckyBreaks}")
         self.select(sortedTeams)
@@ -118,13 +121,8 @@ class Model:
 
     # Create new teams cloned from the remaining root teams
     def evolve(self) -> None:
-        left_team_len = Parameters.POPULATION_SIZE-len(self.getRootTeams())
-        #for i in range(int(left_team_len*Parameters.CROSSOVER_PROBABILITY)):
-        #    offspring1,offspring2 = Mutator.team_crossover(self.programPopulation,self.teamPopulation)
-        #    self.teamPopulation.append(offspring1)
-        #    self.teamPopulation.append(offspring2)
-
         while len(self.getRootTeams()) < Parameters.POPULATION_SIZE:
-            team = random.choice(self.getRootTeams()).copy()
-            Mutator.mutateTeam(self.programPopulation, self.teamPopulation, team)
-            self.teamPopulation.append(team)
+            parent_team = random.choice(self.getRootTeams())
+            child_team =parent_team.copy(self.programPopulation)
+            Mutator.mutateTeam(self.programPopulation, self.teamPopulation, child_team)
+            self.teamPopulation.append(child_team)

@@ -23,7 +23,7 @@ def main():
     X = iris.data
     y = iris.target
     
-    for i in range(100):
+    for i in range(20):
         champion_team=model.generation(X,y,i)
         #print(debugger.getInformation(model))
 

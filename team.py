@@ -64,8 +64,9 @@ class Team:
 
     
     # Given a parent team, a new offspring team is cloned and mutated
-    def copy(self):
+    def copy(self,programPopulation):
         clone: 'Team' = deepcopy(self)
+        #clone = Team(programPopulation,self.programs)
         clone.referenceCount = 0
         clone.luckyBreaks = 0
         clone.id = uuid4()
