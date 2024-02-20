@@ -23,7 +23,7 @@ class Mutator:
                 instruction.source = instruction.source % Parameters.NUM_REGISTERS
                 
         elif mutatedPart == "OPERATION":
-            instruction.operation = random.choice(['+', '-', '*', '/'])
+            instruction.operation = random.choice(['+', '-', '*', '/', 'COS', 'NEGATE'])
 
         elif mutatedPart == "SOURCE REGISTER":
             if instruction.mode == "INPUT":
@@ -77,10 +77,7 @@ class Mutator:
     @staticmethod
     def mutateTeam(programPopulation: List[Program], teamPopulation: List[Team], team: Team):
         
-        numAtomicActions: int = 0
-        for program in team.programs:
-            if program.action in Parameters.ACTIONS:
-                numAtomicActions += 1
+
         # add a program
         if random.random() < Parameters.ADD_PROGRAM_PROBABILITY:
             
@@ -95,7 +92,9 @@ class Mutator:
 
         # delete a program
         if random.random() < Parameters.DELETE_PROGRAM_PROBABILITY:
-            if len(team.programs) > 1:
+            numAtomicActions = team.getAtomicActionNum()
+                    
+            if len(team.programs) > 1 and numAtomicActions>1:
                 team.programs.remove(random.choice(team.programs))
         
         # create a new program
@@ -104,26 +103,30 @@ class Mutator:
             programPopulation.append(program)
             team.programs.append(program)
 
-        # mutate a program's action
+        #mutate a program
         if random.random() < Parameters.MUTATE_PROGRAM_PROBABILITY:
-            program: Program = random.choice(team.programs)
+            selectedProgram = random.choice(team.programs) 
+            newProgram = selectedProgram.clone()
+            Mutator.mutateProgram(newProgram)
             
+            numAtomicActions = team.getAtomicActionNum()
             # A team must have at least one atomic action!
             if numAtomicActions > 1 and random.random() < Parameters.TEAM_POINTER_PROBABILITY:
                 newTeam: Team = random.choice(teamPopulation)
                 while newTeam.id == team.id:
                     newTeam = random.choice(teamPopulation)
-
                 newTeam.referenceCount += 1    
-                program.action = str(newTeam.id) 
+                newProgram.action = str(newTeam.id) 
             else:
-                if program.action not in Parameters.ACTIONS:
+                if newProgram.action not in Parameters.ACTIONS:
                     for t in teamPopulation:
-                        if str(t.id) == program.action:
+                        if str(t.id) == newProgram.action:
                             t.referenceCount -= 1
                 
-                program.action = random.choice(Parameters.ACTIONS)
-
+                newProgram.action = random.choice(Parameters.ACTIONS)
+            team.programs.append(newProgram)
+            programPopulation.append(newProgram)
+'''
     @staticmethod
     def team_crossover(programPopulation:List[Program],teamPopulation: List[Team]) -> None:
         # Ensure there are at least 2 teams to perform crossover
@@ -152,13 +155,16 @@ class Mutator:
             if program not in offspring2_programs:
                 offspring2_programs.append(program)
 
+
         offspring1 = Team(programPopulation,offspring1_programs)  
         offspring2 = Team(programPopulation,offspring2_programs)  
-
+       # if offspring1.getAtomicActionNum()<1:
+            
         offspring1.referenceCount = 0
         offspring2.referenceCount = 0
 
         return offspring1,offspring2
 
+'''
 
         
