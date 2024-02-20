@@ -39,10 +39,10 @@ class Instruction:
         elif self.operation == "-":
             registers[self.destination] = registers[self.destination] - input[self.source]
         elif self.operation == "*":
-            registers[self.destination] = registers[self.destination] * input[self.source]
+            registers[self.destination] = registers[self.destination] * input[self.source] * 2
         elif self.operation == "/":
             if input[self.source] != 0:
-                registers[self.destination] = registers[self.destination] / input[self.source]
+                registers[self.destination] = registers[self.destination] / input[self.source] /2
             else:
                 registers[self.destination] = 0
         elif self.operation == "COS":

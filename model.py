@@ -60,7 +60,7 @@ class Model:
         sortedTeams: List[Team] = list(sorted(self.getRootTeams(), key=lambda team: team.getFitness()))
         for team in sortedTeams[-Parameters.LUCKY_BREAK_NUM:]:
             team.luckyBreaks += 1
-            
+
         print("Best performing teams:")
         championTeam = sortedTeams[-1]
         print(f"Team {championTeam.id} score: {championTeam.getFitness()}, lucky breaks: {championTeam.luckyBreaks}")
@@ -110,9 +110,8 @@ class Model:
             
             if team.luckyBreaks > 0:
                 team.luckyBreaks -= 1
-                #print(f"Tried to remove team {team.id} but they had a lucky break! {team.getFitness()} (remaining breaks: {team.luckyBreaks})")
+                print(f"Tried to remove team {team.id} but they had a lucky break! {team.getFitness()} (remaining breaks: {team.luckyBreaks})")
             else:
-                #print(f"Removing team {team.id} with fitness {team.getFitness()}")
                 self.teamPopulation.remove(team)
 
         # Clean up, if there are programs that are not referenced by any teams.
@@ -123,6 +122,6 @@ class Model:
     def evolve(self) -> None:
         while len(self.getRootTeams()) < Parameters.POPULATION_SIZE:
             parent_team = random.choice(self.getRootTeams())
-            child_team =parent_team.copy(self.programPopulation)
+            child_team =parent_team.copy()
             Mutator.mutateTeam(self.programPopulation, self.teamPopulation, child_team)
             self.teamPopulation.append(child_team)
