@@ -115,8 +115,9 @@ class Mutator:
                 newTeam: Team = random.choice(teamPopulation)
                 while newTeam.id == team.id:
                     newTeam = random.choice(teamPopulation)
-                newTeam.referenceCount += 1    
-                newProgram.action = str(newTeam.id) 
+                if newTeam.referenceCount!=0:
+                    newTeam.referenceCount += 1    
+                    newProgram.action = str(newTeam.id) 
             else:
                 if newProgram.action not in Parameters.ACTIONS:
                     for t in teamPopulation:

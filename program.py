@@ -5,6 +5,7 @@ from uuid import uuid4
 from typing import List, Dict
 import numpy as np
 from parameters import Parameters
+from copy import deepcopy
 
 class Program:
     def __init__(self,instructions =None,action=None):
@@ -19,7 +20,7 @@ class Program:
         if instructions == None:
             self.instructions: List[Instruction] = []
          # Generate a list of instructions ranging from 1 to the maximum number of instructions
-            for _ in range(random.randint(1, Parameters.MAX_INSTRUCTION_COUNT)):
+            for _ in range(random.randint(4, Parameters.MAX_INSTRUCTION_COUNT)):
                 self.instructions.append(Instruction())
         else:
             self.instructions = instructions
@@ -49,5 +50,9 @@ class Program:
         }
 
     def clone(self):
-        clone = Program(self.instructions,self.action)
+        clone: 'Program' = deepcopy(self)
+        #clone = Program(self.instructions,self.action)
         return clone
+    
+    def copy(self):
+        return deepcopy(self)

@@ -63,10 +63,19 @@ class Team:
             return self.scores[-1]
 
     
-    # Given a parent team, a new offspring team is cloned and mutated
-    def copy(self,programPopulation):
+# Given a parent team, a new offspring team is cloned and mutated
+    def copy(self) -> "Team":
+        """
+        Clones an existing team
+        If the original team has 'lucky breaks', they are not carried over to the cloned team.
+        The clone is given a new ID such that no two teams have the same ID.
+        :return: A new team with identical behaviour to the team that was cloned.
+        """
         clone: 'Team' = deepcopy(self)
-        #clone = Team(programPopulation,self.programs)
+        clone.programs = []
+ 
+        for program in self.programs:
+            clone.programs.append(program.copy())
         clone.referenceCount = 0
         clone.luckyBreaks = 0
         clone.id = uuid4()
